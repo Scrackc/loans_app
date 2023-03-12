@@ -10,54 +10,54 @@ class LoanScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     final String idLoan = ModalRoute.of(context)!.settings.arguments as String;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(''),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(''),
+        ),
+        body: ChangeNotifierProvider(
+          create: (contex) => LoanService(idLoan),
+          child: const _LoanScreenBody(),
+        ),
       ),
-      body: ChangeNotifierProvider(
-        create: (contex) => LoanService( idLoan ),
-        child: const _LoanScreenBody(),
-      ),
-      // floatingActionButton: FloatingActionButton(onPressed: () {
-      //   loanService.loadLoan(loanService.selectedLoan.id);
-      // },),
     );
   }
 }
 
 class _LoanScreenBody extends StatelessWidget {
-  
   const _LoanScreenBody();
 
   @override
   Widget build(BuildContext context) {
-    
     final loanService = Provider.of<LoanService>(context);
-    if(loanService.isLoading) {
-      return const Center(child: CircularProgressIndicator.adaptive(),);
-    }
-    return SafeArea(
-      child: Container(
-            child: Column(
-              children: [
-                _Header(loan: loanService.loan),
-                const SizedBox(
-                  height: 25,
-                ),
-                const Text(
-                  "Products",
-                  style: TextStyle(fontSize: 25),
-                ),
-                Expanded(
-                    child: _ListProducts(
-                  details: loanService.loan.details,
-                ))
-              ],
-            ),
-          ),
+    if (loanService.isLoading) {
+      return const Center(
+        child: CircularProgressIndicator.adaptive(),
       );
+    }
+    return RefreshIndicator(
+      onRefresh: () async {},
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _Header(loan: loanService.loan),
+            const SizedBox(
+              height: 25,
+            ),
+            const Text(
+              "Products",
+              style: TextStyle(fontSize: 25),
+            ),
+            _ListProducts(
+              details: loanService.loan.details,
+            )
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -138,45 +138,61 @@ class _ListProducts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loanService = Provider.of<LoanService>(context, listen: false);
-
     return ListView.builder(
+      shrinkWrap: true,
+      primary: false,
       itemBuilder: (context, index) {
-        return Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: ListTile(
-            title: Text(details[index].product.name),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 5),
-                Text('Borrowed: ${details[index].quantity.toString()}'),
-                const SizedBox(height: 3),
-                Text(
-                    'Returned: ${(details[index].quantity - details[index].remainingQuantity).toString()}'),
-              ],
-            ),
-            leading: (details[index].remainingQuantity == 0)
-                ? const Icon(Icons.check)
-                : const Icon(Icons.clear),
-            trailing: TextButton(
-              child: const Icon(Icons.edit),
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  builder: (_) {
-                    return ListenableProvider.value(
-                      value: loanService,
-                      child: _BottomReturProduct(detail: details[index]),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-        );
+        return _ListItem(item: details[index]);
       },
       itemCount: details.length,
+    );
+  }
+}
+
+class _ListItem extends StatelessWidget {
+  const _ListItem({
+    required this.item,
+  });
+
+  final Detail item;
+
+  @override
+  Widget build(BuildContext context) {
+    final loanService = Provider.of<LoanService>(context, listen: false);
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: ListTile(
+        title: Text(item.product.name),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 5),
+            Text('Borrowed: ${item.quantity.toString()}'),
+            const SizedBox(height: 3),
+            Text(
+                'Returned: ${(item.quantity - item.remainingQuantity).toString()}'),
+          ],
+        ),
+        leading: (item.remainingQuantity == 0)
+            ? const Icon(Icons.check)
+            : const Icon(Icons.clear),
+        trailing: (item.remainingQuantity == 0)
+            ? null
+            : TextButton(
+                child: const Icon(Icons.edit),
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (_) {
+                      return ListenableProvider.value(
+                        value: loanService,
+                        child: _BottomReturProduct(detail: item),
+                      );
+                    },
+                  );
+                },
+              ),
+      ),
     );
   }
 }
@@ -193,7 +209,6 @@ class _BottomReturProductState extends State<_BottomReturProduct> {
   int count = 1;
   @override
   Widget build(BuildContext context) {
-    
     return Container(
       height: 300,
       padding: const EdgeInsets.only(top: 30),
@@ -264,9 +279,9 @@ class _BottomReturProductState extends State<_BottomReturProduct> {
           ),
           FilledButton(
             onPressed: () {
-              final loanService = Provider.of<LoanService>(context, listen: false);
+              final loanService =
+                  Provider.of<LoanService>(context, listen: false);
               loanService.updateLoan(widget.detail.productId, count);
-              
             },
             child: const Text('Save'),
           ),

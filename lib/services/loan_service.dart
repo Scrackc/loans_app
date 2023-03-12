@@ -3,9 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:loan_app/models/models.dart';
 import 'package:http/http.dart' as http;
 
-
-class LoanService extends ChangeNotifier{
-   final _baseUrl = '192.168.1.93:3000';
+class LoanService extends ChangeNotifier {
+  final _baseUrl = '192.168.1.68:3000';
 
   // Containers
   late final SingleLoan loan;
@@ -16,7 +15,7 @@ class LoanService extends ChangeNotifier{
   bool isError = false;
   String error = '';
 
-  LoanService(this.idLoan){
+  LoanService(this.idLoan) {
     loadLoan(idLoan);
   }
 
@@ -34,15 +33,27 @@ class LoanService extends ChangeNotifier{
     return respJson;
   }
 
-  Future saveLoan()async{
+  Future saveLoan() async {}
 
+  Future updateLoan(String productId, int quantity) async {
+    final Map authData = {'idProduct': productId, 'quantity': quantity};
+    try {
+      final url = Uri.http(_baseUrl, 'loan/${loan.id}');
+      final rp = await http.patch(url, body: json.encode(authData), headers: {
+        "Content-Type": "application/json",
+        'Authorization':
+            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjBmNzQxYWNlLWY2YzYtNDVlYy04OTc1LTY4MzBjZjdmYzNkZSIsImlhdCI6MTY3ODU5MzM4OSwiZXhwIjoxNjc4NjA3Nzg5fQ.06beMhkIOUqPFE3RhtDgZyX21TpvqRMvJbuZXW1kKDc'
+      });
+
+      final product =
+          loan.details.firstWhere((element) => element.productId == productId);
+
+      product.remainingQuantity -= quantity;
+
+      // await loadLoan(loan.id);
+      notifyListeners();
+    } catch (e) {
+      print(e);
+    }
   }
-
-  Future updateLoan(String productId, int quantity )async{
-    final product = loan.details.firstWhere((element) => element.productId == productId);
-    product.remainingQuantity -= quantity; 
-    loan.client.name = 'Abelardo';
-    notifyListeners();
-  }
-
 }

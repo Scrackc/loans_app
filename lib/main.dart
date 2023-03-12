@@ -23,6 +23,9 @@ class AppState extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => LoansService(),
         ),
+        ChangeNotifierProvider(
+          create: (_) => UsersService(),
+        ),
       ],
       child: const MyApp(),
     );
@@ -41,7 +44,7 @@ class MyApp extends StatelessWidget {
       ),
       scaffoldMessengerKey: NotificationsService.messengerKey,
       title: 'loans app',
-      initialRoute: HomeScreen.routerName,
+      initialRoute: LoginScreen.routerName,
       routes: {
         LoginScreen.routerName: (_) => const LoginScreen(),
         HomeScreen.routerName: (_) => const HomeScreen(),
@@ -49,6 +52,7 @@ class MyApp extends StatelessWidget {
         LoansScreen.routerName: (_) => const LoansScreen(),
         ProductsScreen.routerName: (_) => const ProductsScreen(),
         LoanScreen.routerName: (_) => const LoanScreen(),
+        NewLoanScreen.routerName: (_) => const NewLoanScreen(),
       },
     );
   }

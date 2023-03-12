@@ -6,7 +6,7 @@ import 'dart:convert';
 import '../models/models.dart';
 
 class AuthService extends ChangeNotifier {
-  final String _baseUrl = '192.168.1.93:3000';
+  final String _baseUrl = '192.168.1.68:3000';
 
   final storage = const FlutterSecureStorage();
 
@@ -45,18 +45,15 @@ class AuthService extends ChangeNotifier {
       final Map<String, dynamic> loginMap = json.decode(resp.body);
       try {
         final decodeResp = Login.fromJson(loginMap);
-         await storage.write(key: 'token', value: decodeResp.token);
-         
+        await storage.write(key: 'token', value: decodeResp.token);
       } catch (e) {
         final decodeResp = ErrorHttp.fromJson(loginMap);
         return decodeResp.message;
       }
-
-    } catch (e) { // Network Error
+    } catch (e) {
+      // Network Error
       return 'Error en la red';
     }
-
-
   }
 
   Future logout() async {

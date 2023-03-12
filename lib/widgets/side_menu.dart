@@ -3,34 +3,41 @@ import 'package:loan_app/providers/providers.dart';
 import 'package:provider/provider.dart';
 
 class SideMenu extends StatelessWidget {
-
   const SideMenu({super.key});
 
   @override
   Widget build(BuildContext context) {
-
     final menuProvider = Provider.of<MenuProvider>(context);
     return Drawer(
       // const _DrawerHeader(),
       child: ListView.builder(
-
         itemCount: menuProvider.menuItems.length,
         itemBuilder: (context, index) {
-          if(index == 0) return const _DrawerHeader();
+          // if(index == 0) return const _DrawerHeader();
           return Container(
-            
             margin: const EdgeInsets.symmetric(horizontal: 10),
             decoration: BoxDecoration(
-              color: menuProvider.currentSelect == index ? const Color.fromRGBO(169, 245, 199, 0.498): null,
-              borderRadius: BorderRadius.circular(10)
-            ),
+                color: menuProvider.currentSelect == index
+                    ? const Color.fromRGBO(169, 245, 199, 0.498)
+                    : null,
+                borderRadius: BorderRadius.circular(10)),
             child: ListTile(
-              leading: Icon(menuProvider.menuItems.values.elementAt(index), color: menuProvider.currentSelect == index
+              leading: Icon(
+                menuProvider.menuItems.values.elementAt(index),
+                color: menuProvider.currentSelect == index
                     ? const Color.fromRGBO(93, 240, 152, 1)
-                    : null,),
-              title: Text(menuProvider.menuItems.keys.elementAt(index), style: TextStyle(color: menuProvider.currentSelect == index ? const Color.fromRGBO(93, 240, 152, 1) : null),),
+                    : null,
+              ),
+              title: Text(
+                menuProvider.menuItems.keys.elementAt(index),
+                style: TextStyle(
+                    color: menuProvider.currentSelect == index
+                        ? const Color.fromRGBO(93, 240, 152, 1)
+                        : null),
+              ),
               onTap: () {
-                Navigator.pushReplacementNamed(context, menuProvider.menuItems.keys.elementAt(index));
+                Navigator.pushReplacementNamed(
+                    context, menuProvider.menuItems.keys.elementAt(index));
                 menuProvider.currentSelect = index;
               },
             ),

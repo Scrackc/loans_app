@@ -23,7 +23,8 @@ class SingleLoan {
   User user;
   List<Detail> details;
 
-  factory SingleLoan.fromRawJson(String str) => SingleLoan.fromJson(json.decode(str));
+  factory SingleLoan.fromRawJson(String str) =>
+      SingleLoan.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
@@ -80,29 +81,5 @@ class Detail {
         "quantity": quantity,
         "remainingQuantity": remainingQuantity,
         "product": product.toJson(),
-      };
-}
-
-class Product {
-  Product({
-    required this.id,
-    required this.name,
-  });
-
-  String id;
-  String name;
-
-  factory Product.fromRawJson(String str) => Product.fromJson(json.decode(str));
-
-  String toRawJson() => json.encode(toJson());
-
-  factory Product.fromJson(Map<String, dynamic> json) => Product(
-        id: json["id"],
-        name: json["name"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "name": name,
       };
 }
