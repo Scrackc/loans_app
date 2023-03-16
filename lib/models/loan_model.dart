@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:loan_app/models/user_model.dart';
+import 'package:loan_app/models/models.dart';
 
 class Loans {
   Loans({
@@ -33,6 +33,7 @@ class Loan {
     required this.isComplete,
     required this.client,
     required this.user,
+    this.details,
   });
 
   String id;
@@ -40,6 +41,7 @@ class Loan {
   bool isComplete;
   User client;
   User user;
+  List<Detail>? details;
 
   factory Loan.fromRawJson(String str) => Loan.fromJson(json.decode(str));
 
@@ -51,6 +53,10 @@ class Loan {
         isComplete: json["isComplete"],
         client: User.fromJson(json["client"]),
         user: User.fromJson(json["user"]),
+        details: json["details"] == null
+            ? []
+            : List<Detail>.from(
+                json["details"]!.map((x) => Detail.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
@@ -59,6 +65,45 @@ class Loan {
         "isComplete": isComplete,
         "client": client.toJson(),
         "user": user.toJson(),
+        "details": details == null
+            ? []
+            : List<dynamic>.from(details!.map((x) => x.toJson())),
       };
-  Loan copy() => Loan(client: client, id: id, date: date, isComplete: isComplete, user: user);
 }
+
+class Detail {
+  Detail({
+    required this.loanId,
+    required this.productId,
+    required this.quantity,
+    required this.remainingQuantity,
+    required this.product,
+  });
+
+  String loanId;
+  String productId;
+  int quantity;
+  int remainingQuantity;
+  Product product;
+
+  factory Detail.fromRawJson(String str) => Detail.fromJson(json.decode(str));
+
+  String toRawJson() => json.encode(toJson());
+
+  factory Detail.fromJson(Map<String, dynamic> json) => Detail(
+        loanId: json["loanId"],
+        productId: json["productId"],
+        quantity: json["quantity"],
+        remainingQuantity: json["remainingQuantity"],
+        product: Product.fromJson(json["product"]),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "loanId": loanId,
+        "productId": productId,
+        "quantity": quantity,
+        "remainingQuantity": remainingQuantity,
+        "product": product.toJson(),
+      };
+}
+

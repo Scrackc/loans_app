@@ -1,12 +1,14 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
+import 'package:loan_app/utils/dio_instance.dart';
 import 'dart:convert';
 
 import '../models/models.dart';
 
 class AuthService extends ChangeNotifier {
-  final String _baseUrl = '192.168.1.68:3000';
+  
+  final Dio _dio = DioInstance().dio;
 
   final storage = const FlutterSecureStorage();
 
@@ -31,23 +33,21 @@ class AuthService extends ChangeNotifier {
   // }
 
   Future<String?> login(String email, String password) async {
-    final Map<String, dynamic> authData = {
-      'email': email,
-      'password': password
-    };
-    final url = Uri.http(_baseUrl, '/auth');
+    
     try {
-      final resp = await http.post(
-        url,
-        body: authData,
+      final resp = await _dio.post(
+        '/auth',
+        data: {
+          'email': email, 'password': password
+        },
       );
 
-      final Map<String, dynamic> loginMap = json.decode(resp.body);
+      
       try {
-        final decodeResp = Login.fromJson(loginMap);
+        final decodeResp = Login.fromJson(resp.data);
         await storage.write(key: 'token', value: decodeResp.token);
       } catch (e) {
-        final decodeResp = ErrorHttp.fromJson(loginMap);
+        final decodeResp = ErrorHttp.fromJson(resp.data);
         return decodeResp.message;
       }
     } catch (e) {

@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
       ),
       scaffoldMessengerKey: NotificationsService.messengerKey,
       title: 'loans app',
-      initialRoute: LoginScreen.routerName,
+      initialRoute: HomeScreen.routerName,
       routes: {
         LoginScreen.routerName: (_) => const LoginScreen(),
         HomeScreen.routerName: (_) => const HomeScreen(),

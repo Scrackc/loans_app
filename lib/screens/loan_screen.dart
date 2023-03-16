@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:loan_app/models/models.dart';
-import 'package:loan_app/services/services.dart';
 import 'package:provider/provider.dart';
+
+import '../services/services.dart';
 
 class LoanScreen extends StatelessWidget {
   static String routerName = 'Loan-item';
@@ -10,14 +11,15 @@ class LoanScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String idLoan = ModalRoute.of(context)!.settings.arguments as String;
+    final Loan loan = ModalRoute.of(context)!.settings.arguments as Loan;
+
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
           title: const Text(''),
         ),
         body: ChangeNotifierProvider(
-          create: (contex) => LoanService(idLoan),
+          create: (contex) => LoanService(loan.id),
           child: const _LoanScreenBody(),
         ),
       ),
@@ -25,36 +27,74 @@ class LoanScreen extends StatelessWidget {
   }
 }
 
-class _LoanScreenBody extends StatelessWidget {
+class _LoanScreenBody extends StatefulWidget {
   const _LoanScreenBody();
+
+  @override
+  State<_LoanScreenBody> createState() => _LoanScreenBodyState();
+}
+
+class _LoanScreenBodyState extends State<_LoanScreenBody> {
+  late final LoanService loanService;
+
+  @override
+  void initState() {
+    loanService = Provider.of<LoanService>(context, listen: false);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    loanService.changeActive();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final loanService = Provider.of<LoanService>(context);
+
     if (loanService.isLoading) {
       return const Center(
         child: CircularProgressIndicator.adaptive(),
       );
     }
+
     return RefreshIndicator(
-      onRefresh: () async {},
+      onRefresh: () async {
+        await Future.delayed(Duration(seconds: 5));
+      },
       child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _Header(loan: loanService.loan),
-            const SizedBox(
-              height: 25,
-            ),
-            const Text(
-              "Products",
-              style: TextStyle(fontSize: 25),
-            ),
-            _ListProducts(
-              details: loanService.loan.details,
-            )
-          ],
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height - kToolbarHeight - 32,
+          child: Column(
+            children: [
+              _Header(loan: loanService.loan),
+              Expanded(
+                child: PageView(
+                  children: [
+                    
+                    Column(
+                      children: [
+                        Text('Productos'),
+                    _ListProducts( details: [...loanService.loan.details!, ...loanService.loan.details!
+                        , ...loanService.loan.details!
+                        ]),
+
+                      ],
+                    ),
+                    Container(
+                      height: 300,
+                      color: Colors.green,
+                    ),
+                    Container(
+                      height: 300,
+                      color: Colors.blue,
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -62,7 +102,7 @@ class _LoanScreenBody extends StatelessWidget {
 }
 
 class _Header extends StatelessWidget {
-  final SingleLoan loan;
+  final Loan loan;
   const _Header({required this.loan});
 
   @override
@@ -138,13 +178,15 @@ class _ListProducts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      shrinkWrap: true,
-      primary: false,
-      itemBuilder: (context, index) {
-        return _ListItem(item: details[index]);
-      },
-      itemCount: details.length,
+    return Expanded(
+      child: ListView.builder(
+        shrinkWrap: false,
+        primary: true,
+        itemBuilder: (context, index) {
+          return _ListItem(item: details[index]);
+        },
+        itemCount: details.length,
+      ),
     );
   }
 }
@@ -290,3 +332,4 @@ class _BottomReturProductState extends State<_BottomReturProduct> {
     );
   }
 }
+

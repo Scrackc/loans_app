@@ -1,18 +1,21 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+
+import 'package:loan_app/utils/dio_instance.dart';
 
 import '../models/models.dart';
 
 class UsersService extends ChangeNotifier {
-  final _baseUrl = '192.168.1.68:3000';
+  
+  final Dio _dio = DioInstance().dio;
 
   Future<List<User>> loadUsers() async {
-    final url = Uri.http(_baseUrl, 'users');
-    final resp = await http.get(url);
-    final Map<String, dynamic> usersMap = json.decode(resp.body);
-    final respJson = Users.fromJson(usersMap);
+    
+    final resp = await _dio.get('/users');
+    
+    final respJson = Users.fromJson(resp.data);
     // return respJson.users.map((e) => e.name);
     print('me acrive');
     return respJson.users;

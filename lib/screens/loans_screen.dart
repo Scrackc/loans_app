@@ -53,7 +53,7 @@ class LoansScreen extends StatelessWidget {
                                   onTap: () {
                                     Navigator.pushNamed(
                                         context, LoanScreen.routerName,
-                                        arguments: loan.id);
+                                        arguments: loan);
                                   },
                                 );
                               },

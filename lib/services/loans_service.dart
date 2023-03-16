@@ -1,11 +1,15 @@
-import 'dart:convert';
-
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:loan_app/models/models.dart';
-import 'package:http/http.dart' as http;
+import 'package:loan_app/utils/dio_instance.dart';
+// import 'dart:typed_data';
+
+import 'cache_service.dart';
 
 class LoansService extends ChangeNotifier {
-  final _baseUrl = '192.168.1.68:3000';
+  final Dio _dio = DioInstance().dio;
+
+  final _cache = CrudCacheService<Loan>(fromJson: Loan.fromJson);
 
   // Containers
   final List<Loan> loans = [];
@@ -19,24 +23,28 @@ class LoansService extends ChangeNotifier {
     loadLoans();
   }
 
+ 
+
   Future<List<Loan>> _getLoans() async {
+    final loans = await _cache.getAll('/loans');
+    if (loans.isNotEmpty) {
+      return loans;
+    }
+
     try {
-      final url = Uri.http(_baseUrl, 'loan');
-      final resp = await http.get(url);
-      final Map<String, dynamic> loansMap = json.decode(resp.body);
-      try {
-        final respJson = Loans.fromJson(loansMap);
-        return respJson.loans;
-      } catch (e) {
-        final decodeResp = ErrorHttp.fromJson(loansMap);
-        isError = true;
-        error = decodeResp.message;
-        return [];
-      }
-    } catch (e) {
-      print(e);
+      final resp = await _dio.get('/loan');
+      final respJson = Loans.fromJson(resp.data);
+      await _cache.addList(respJson.loans, '/loans', const Duration(seconds: 10));
+
+      return respJson.loans;
+      
+    } on DioError catch (e) {
+      error = e.error.toString();
       isError = true;
+      return [];
+    }catch (e){
       error = 'Error desconocido';
+      isError = true;
       return [];
     }
   }
@@ -63,4 +71,5 @@ class LoansService extends ChangeNotifier {
     loans.addAll(loansResp);
     notifyListeners();
   }
+
 }
