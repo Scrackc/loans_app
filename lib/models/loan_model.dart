@@ -34,6 +34,7 @@ class Loan {
     required this.client,
     required this.user,
     this.details,
+    this.moves,
   });
 
   String id;
@@ -42,6 +43,7 @@ class Loan {
   User client;
   User user;
   List<Detail>? details;
+  List<Move>? moves;
 
   factory Loan.fromRawJson(String str) => Loan.fromJson(json.decode(str));
 
@@ -57,6 +59,9 @@ class Loan {
             ? []
             : List<Detail>.from(
                 json["details"]!.map((x) => Detail.fromJson(x))),
+        moves: json["moves"] == null
+            ? []
+            : List<Move>.from(json["moves"]!.map((x) => Move.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
@@ -68,6 +73,9 @@ class Loan {
         "details": details == null
             ? []
             : List<dynamic>.from(details!.map((x) => x.toJson())),
+        "moves": moves == null
+            ? []
+            : List<dynamic>.from(moves!.map((x) => x.toJson())),
       };
 }
 
@@ -107,3 +115,46 @@ class Detail {
       };
 }
 
+class Move {
+  Move({
+    required this.id,
+    required this.quantity,
+    required this.date,
+    required this.loanId,
+    required this.productId,
+    required this.product,
+    required this.user,
+  });
+
+  int id;
+  int quantity;
+  DateTime date;
+  String loanId;
+  String productId;
+  Product product;
+  User user;
+
+  factory Move.fromRawJson(String str) => Move.fromJson(json.decode(str));
+
+  String toRawJson() => json.encode(toJson());
+
+  factory Move.fromJson(Map<String, dynamic> json) => Move(
+        id: json["id"],
+        quantity: json["quantity"],
+        date: DateTime.parse(json["date"]),
+        loanId: json["loanId"],
+        productId: json["productId"],
+        product: Product.fromJson(json["product"]),
+        user: User.fromJson(json["user"]),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "quantity": quantity,
+        "date": date.toIso8601String(),
+        "loanId": loanId,
+        "productId": productId,
+        "product": product.toJson(),
+        "user": user.toJson(),
+      };
+}

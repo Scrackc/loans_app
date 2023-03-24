@@ -35,19 +35,19 @@ class _LoanScreenBody extends StatefulWidget {
 }
 
 class _LoanScreenBodyState extends State<_LoanScreenBody> {
-  late final LoanService loanService;
+  // late final LoanService loanService;
 
-  @override
-  void initState() {
-    loanService = Provider.of<LoanService>(context, listen: false);
-    super.initState();
-  }
+  // @override
+  // void initState() {
+  //   loanService = Provider.of<LoanService>(context, listen: false);
+  //   super.initState();
+  // }
 
-  @override
-  void dispose() {
-    loanService.changeActive();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   loanService.changeActive();
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -72,30 +72,62 @@ class _LoanScreenBodyState extends State<_LoanScreenBody> {
               Expanded(
                 child: PageView(
                   children: [
-                    
                     Column(
                       children: [
                         Text('Productos'),
-                    _ListProducts( details: [...loanService.loan.details!, ...loanService.loan.details!
-                        , ...loanService.loan.details!
-                        ]),
-
+                        _ListProducts(),
                       ],
                     ),
-                    Container(
-                      height: 300,
-                      color: Colors.green,
+                    Column(
+                      children: [
+                        Text('Movimientos'),
+                        if(loanService.loan.moves!.isEmpty)
+                        Expanded(
+                          child: Center(
+                            child: Text("Sin movimientos"),
+                          ),
+                        )
+                        else
+                        _ListMoves()
+                      ],
                     ),
-                    Container(
-                      height: 300,
-                      color: Colors.blue,
-                    ),
+                    
                   ],
                 ),
               )
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ListMoves extends StatelessWidget {
+  
+  const _ListMoves();
+
+  @override
+  Widget build(BuildContext context) {
+    final moves = Provider.of<LoanService>(context).loan.moves!;
+    return Expanded(
+      child: ListView.builder(
+        shrinkWrap: false,
+        primary: true,
+        itemBuilder: (context, index) {
+            return ListTile(
+              title: Text(moves[index].product.name),
+              subtitle: Column(
+                children: [
+                  Text('Quantity: ${moves[index].user.name}'),
+                  Text('Date: ${DateFormat(
+                  'd MMM, y',
+                ).format(moves[index].date)}'),
+                ],
+              ),
+            );
+        },
+        itemCount: moves.length,
       ),
     );
   }
@@ -173,11 +205,12 @@ class _Header extends StatelessWidget {
 }
 
 class _ListProducts extends StatelessWidget {
-  final List<Detail> details;
-  const _ListProducts({required this.details});
+  const _ListProducts();
 
   @override
   Widget build(BuildContext context) {
+    final details = Provider.of<LoanService>(context).loan.details!;
+
     return Expanded(
       child: ListView.builder(
         shrinkWrap: false,
@@ -332,4 +365,3 @@ class _BottomReturProductState extends State<_BottomReturProduct> {
     );
   }
 }
-

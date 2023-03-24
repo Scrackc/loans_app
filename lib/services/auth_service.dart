@@ -42,14 +42,11 @@ class AuthService extends ChangeNotifier {
         },
       );
 
-      
-      try {
         final decodeResp = Login.fromJson(resp.data);
         await storage.write(key: 'token', value: decodeResp.token);
-      } catch (e) {
-        final decodeResp = ErrorHttp.fromJson(resp.data);
-        return decodeResp.message;
-      }
+      
+    }on DioError catch(e){
+      return e.error.toString();
     } catch (e) {
       // Network Error
       return 'Error en la red';

@@ -30,7 +30,6 @@ class LoansService extends ChangeNotifier {
     if (loans.isNotEmpty) {
       return loans;
     }
-
     try {
       final resp = await _dio.get('/loan');
       final respJson = Loans.fromJson(resp.data);

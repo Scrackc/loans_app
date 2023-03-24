@@ -29,6 +29,10 @@ class LoanService extends ChangeNotifier {
     isActive = false;
   }
 
+  Future _saveCache(Loan loanSave, String id) async {
+    await _cache.add(loanSave, '/loan/$id', const Duration(seconds: 60));
+  }
+
   Future<Loan?> _getLoan(String id) async {
     final loanSearch = await _cache.getOne('/loan/$id');
 
@@ -37,10 +41,10 @@ class LoanService extends ChangeNotifier {
     }
     try {
       final resp = await _dio.get('/loan/$id');
-
       final respJson = Loan.fromJson(resp.data);
-      await _cache.add(respJson, '/loan/$id', const Duration(seconds: 15));
-      await Future.delayed(Duration(seconds: 2));
+      print(respJson.isComplete);
+
+      await _saveCache(respJson, id);
 
       return respJson;
     } catch (e) {
@@ -56,7 +60,7 @@ class LoanService extends ChangeNotifier {
     if (loanSearch != null) {
       loan = loanSearch;
       isLoading = false;
-      if(isActive) notifyListeners();
+      if (isActive) notifyListeners();
 
       return loan;
     }
@@ -64,21 +68,26 @@ class LoanService extends ChangeNotifier {
     isError = true;
   }
 
-  Future saveLoan() async {}
-
   Future updateLoan(String productId, int quantity) async {
     final Map authData = {'idProduct': productId, 'quantity': quantity};
     try {
-      final resp =
-          await _dio.patch('/loan/${loan.id}', data: json.encode(authData));
+      final resp = await _dio.patch('/loan/${loan.id}', data: json.encode(authData));
 
-      final product =
-          loan.details!.firstWhere((element) => element.productId == productId);
+      final product = loan.details!.firstWhere((element) => element.productId == productId);
 
       product.remainingQuantity -= quantity;
-
-      // await loadLoan(loan.id);
+      await _saveCache(loan, loan.id);
       notifyListeners();
+
+      final loanSearch = await _getLoan(loan.id);
+      if(loanSearch != null){
+        print(loanSearch.isComplete);
+        // loan.details = loanSearch.details;
+        loan.isComplete = loanSearch.isComplete;
+        notifyListeners();
+      }
+
+
     } catch (e) {
       print(e);
     }
